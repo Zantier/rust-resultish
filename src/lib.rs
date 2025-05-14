@@ -1,5 +1,5 @@
-//! This crate contains the [`Resultish`] type, which represents success ([`Ok`]), failure
-//! ([`Err`]), or [`Both`]. It can be converted into a [`Result`]:
+//! A [`Resultish`] represents success ([`Ok`]), failure ([`Err`]), or [`Both`]. It can be
+//! converted into a [`Result`]:
 //! - [`Resultish::lenient`]ly, where [`Both`] is mapped to [`Result::Ok`], and the
 //!   failure value is discarded.
 //! - [`Resultish::strict`]ly, where [`Both`] is mapped to [`Result::Err`], and the
