@@ -1,6 +1,6 @@
 use Resultish::{Both, Err, Ok};
 
-/// `Resultish` represents success (`Ok`), failure (`Err`), or both (`Okish`).
+/// `Resultish` represents success ([`Ok`]), failure ([`Err`]), or [`Both`].
 #[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[must_use]
 pub enum Resultish<T, E> {
