@@ -1,13 +1,13 @@
-//! A [`Resultish`] represents success ([`Ok`]), failure ([`Err`]), or [`Both`]. It can be
+//! A [`Resultish`] represents success ([`Ok`]), error ([`Err`]), or [`Both`]. It can be
 //! converted into a [`Result`]:
 //! - [`Resultish::lenient`]ly, where [`Both`] is mapped to [`Result::Ok`], and the
-//!   failure value is discarded.
+//!   error value is discarded.
 //! - [`Resultish::strict`]ly, where [`Both`] is mapped to [`Result::Err`], and the
 //!   success value is discarded.
 
 use Resultish::{Both, Err, Ok};
 
-/// `Resultish` represents success ([`Ok`]), failure ([`Err`]), or [`Both`].
+/// `Resultish` represents success ([`Ok`]), error ([`Err`]), or [`Both`].
 #[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[must_use]
 pub enum Resultish<T, E> {
@@ -20,14 +20,63 @@ pub enum Resultish<T, E> {
 }
 
 impl<T, E> Resultish<T, E> {
+    /// Returns `true` if the result contains a success value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use resultish::Resultish::{self, Both, Err, Ok};
+    ///
+    /// let x: Resultish<i32, &str> = Ok(3);
+    /// assert_eq!(x.has_ok(), true);
+    ///
+    /// let x: Resultish<i32, &str> = Err("Some error message");
+    /// assert_eq!(x.has_ok(), false);
+    ///
+    /// let x: Resultish<i32, &str> = Both(3, "Some error message");
+    /// assert_eq!(x.has_ok(), true);
+    /// ```
     pub fn has_ok(&self) -> bool {
         matches!(self, Ok(_) | Both(_, _))
     }
 
+    /// Returns `true` if the result contains an error value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use resultish::Resultish::{self, Both, Err, Ok};
+    ///
+    /// let x: Resultish<i32, &str> = Ok(3);
+    /// assert_eq!(x.has_err(), false);
+    ///
+    /// let x: Resultish<i32, &str> = Err("Some error message");
+    /// assert_eq!(x.has_err(), true);
+    ///
+    /// let x: Resultish<i32, &str> = Both(3, "Some error message");
+    /// assert_eq!(x.has_err(), true);
+    /// ```
     pub fn has_err(&self) -> bool {
         matches!(self, Err(_) | Both(_, _))
     }
 
+    /// Convert to [`Result`] leniently: [`Both`] is mapped to [`Result::Ok`], and the error value
+    /// is discarded.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use resultish::Resultish::{self, Both, Err, Ok};
+    ///
+    /// let x: Resultish<i32, &str> = Ok(3);
+    /// assert_eq!(x.lenient(), Result::Ok(3));
+    ///
+    /// let x: Resultish<i32, &str> = Err("Some error message");
+    /// assert_eq!(x.lenient(), Result::Err("Some error message"));
+    ///
+    /// let x: Resultish<i32, &str> = Both(3, "Some error message");
+    /// assert_eq!(x.lenient(), Result::Ok(3));
+    /// ```
     pub fn lenient(self) -> Result<T, E> {
         match self {
             Ok(ok) => Result::Ok(ok),
@@ -36,6 +85,7 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Equivalent to `value.lenient().err()`.
     pub fn lenient_err(self) -> Option<E> {
         match self {
             Ok(_) => None,
@@ -44,6 +94,7 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Equivalent to `value.lenient().ok()`.
     pub fn lenient_ok(self) -> Option<T> {
         match self {
             Ok(ok) => Some(ok),
@@ -52,6 +103,8 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Maps a `Resultish<T, E>` to `Resultish<U, E>` by applying a function to the success value,
+    /// and leaving the error value untouched
     pub fn map<U, F>(self, op: F) -> Resultish<U, E>
     where
         F: FnOnce(T) -> U,
@@ -63,6 +116,23 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Convert to [`Result`] strictly: [`Both`] is mapped to [`Result::Err`], and the success value
+    /// is discarded.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use resultish::Resultish::{self, Both, Err, Ok};
+    ///
+    /// let x: Resultish<i32, &str> = Ok(3);
+    /// assert_eq!(x.strict(), Result::Ok(3));
+    ///
+    /// let x: Resultish<i32, &str> = Err("Some error message");
+    /// assert_eq!(x.strict(), Result::Err("Some error message"));
+    ///
+    /// let x: Resultish<i32, &str> = Both(3, "Some error message");
+    /// assert_eq!(x.strict(), Result::Err("Some error message"));
+    /// ```
     pub fn strict(self) -> Result<T, E> {
         match self {
             Ok(ok) => Result::Ok(ok),
@@ -71,6 +141,7 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Equivalent to `value.lenient().err()`.
     pub fn strict_err(self) -> Option<E> {
         match self {
             Ok(_) => None,
@@ -79,6 +150,7 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Equivalent to `value.lenient().ok()`.
     pub fn strict_ok(self) -> Option<T> {
         match self {
             Ok(ok) => Some(ok),
@@ -94,24 +166,5 @@ impl<T, E> From<Result<T, E>> for Resultish<T, E> {
             Result::Ok(ok) => Ok(ok),
             Result::Err(err) => Err(err),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::Resultish::{self, Both, Err, Ok};
-
-    #[test]
-    fn test_has() {
-        let ok: Resultish<i32, String> = Ok(1);
-        let err: Resultish<i32, String> = Err("hi".to_string());
-        let both: Resultish<i32, String> = Both(1, "hi".to_string());
-        assert_eq!(ok.has_ok(), true);
-        assert_eq!(err.has_ok(), false);
-        assert_eq!(both.has_ok(), true);
-
-        assert_eq!(ok.has_err(), false);
-        assert_eq!(err.has_err(), true);
-        assert_eq!(both.has_err(), true);
     }
 }
