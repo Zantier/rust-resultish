@@ -6,10 +6,10 @@ use Resultish::{Both, Err, Ok};
 pub enum Resultish<T, E> {
     /// Contains only a success value
     Ok(T),
-    /// Contains a success and error value
-    Both(T, E),
     /// Contains only an error value
     Err(E),
+    /// Contains a success and error value
+    Both(T, E),
 }
 
 impl<T, E> Resultish<T, E> {
@@ -18,30 +18,30 @@ impl<T, E> Resultish<T, E> {
     }
 
     pub fn has_err(&self) -> bool {
-        matches!(self, Both(_, _) | Err(_))
+        matches!(self, Err(_) | Both(_, _))
     }
 
     pub fn lenient(self) -> Result<T, E> {
         match self {
             Ok(ok) => Result::Ok(ok),
-            Both(ok, _) => Result::Ok(ok),
             Err(err) => Result::Err(err),
+            Both(ok, _) => Result::Ok(ok),
         }
     }
 
     pub fn lenient_err(self) -> Option<E> {
         match self {
             Ok(_) => None,
-            Both(_, _) => None,
             Err(err) => Some(err),
+            Both(_, _) => None,
         }
     }
 
     pub fn lenient_ok(self) -> Option<T> {
         match self {
             Ok(ok) => Some(ok),
-            Both(ok, _) => Some(ok),
             Err(_) => None,
+            Both(ok, _) => Some(ok),
         }
     }
 
@@ -51,32 +51,32 @@ impl<T, E> Resultish<T, E> {
     {
         match self {
             Ok(ok) => Ok(op(ok)),
-            Both(ok, err) => Both(op(ok), err),
             Err(err) => Err(err),
+            Both(ok, err) => Both(op(ok), err),
         }
     }
 
     pub fn strict(self) -> Result<T, E> {
         match self {
             Ok(ok) => Result::Ok(ok),
-            Both(_, err) => Result::Err(err),
             Err(err) => Result::Err(err),
+            Both(_, err) => Result::Err(err),
         }
     }
 
     pub fn strict_err(self) -> Option<E> {
         match self {
             Ok(_) => None,
-            Both(_, err) => Some(err),
             Err(err) => Some(err),
+            Both(_, err) => Some(err),
         }
     }
 
     pub fn strict_ok(self) -> Option<T> {
         match self {
             Ok(ok) => Some(ok),
-            Both(_, _) => None,
             Err(_) => None,
+            Both(_, _) => None,
         }
     }
 }
@@ -97,14 +97,14 @@ mod tests {
     #[test]
     fn test_has() {
         let ok: Resultish<i32, String> = Ok(1);
-        let both: Resultish<i32, String> = Both(1, "hi".to_string());
         let err: Resultish<i32, String> = Err("hi".to_string());
+        let both: Resultish<i32, String> = Both(1, "hi".to_string());
         assert_eq!(ok.has_ok(), true);
-        assert_eq!(both.has_ok(), true);
         assert_eq!(err.has_ok(), false);
+        assert_eq!(both.has_ok(), true);
 
         assert_eq!(ok.has_err(), false);
-        assert_eq!(both.has_err(), true);
         assert_eq!(err.has_err(), true);
+        assert_eq!(both.has_err(), true);
     }
 }
