@@ -141,7 +141,7 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
-    /// Equivalent to `value.lenient().err()`.
+    /// Equivalent to `value.strict().err()`.
     pub fn strict_err(self) -> Option<E> {
         match self {
             Ok(_) => None,
@@ -150,7 +150,7 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
-    /// Equivalent to `value.lenient().ok()`.
+    /// Equivalent to `value.strict().ok()`.
     pub fn strict_ok(self) -> Option<T> {
         match self {
             Ok(ok) => Some(ok),
