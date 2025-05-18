@@ -158,6 +158,31 @@ impl<T, E> Resultish<T, E> {
             Both(_, _) => None,
         }
     }
+
+    /// Convert to tuple of the success and error values.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use resultish::Resultish::{self, Both, Err, Ok};
+    ///
+    /// let x: Resultish<i32, &str> = Ok(3);
+    /// assert_eq!(x.tuple(), (Some(3), None));
+    ///
+    /// let x: Resultish<i32, &str> = Err("Some error message");
+    /// assert_eq!(x.tuple(), (None, Some("Some error message")));
+    ///
+    /// let x: Resultish<i32, &str> = Both(3, "Some error message");
+    /// assert_eq!(x.tuple(), (Some(3), Some("Some error message")));
+    /// ```
+    pub fn tuple(self) -> (Option<T>, Option<E>) {
+        match self {
+            Ok(ok) => (Some(ok), None),
+            Err(err) => (None, Some(err)),
+            Both(ok, err) => (Some(ok), Some(err)),
+        }
+    }
+
 }
 
 impl<T, E> From<Result<T, E>> for Resultish<T, E> {
