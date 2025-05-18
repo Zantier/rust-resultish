@@ -116,6 +116,19 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
+    /// Maps a `Resultish<T, E>` to `Resultish<T, F>` by applying a function to the success value,
+    /// and leaving the error value untouched
+    pub fn map_err<F, O>(self, op: O) -> Resultish<T, F>
+    where
+        O: FnOnce(E) -> F,
+    {
+        match self {
+            Ok(ok) => Ok(ok),
+            Err(err) => Err(op(err)),
+            Both(ok, err) => Both(ok, op(err)),
+        }
+    }
+
     /// Convert to [`Result`] strictly: [`Both`] is mapped to [`Result::Err`], and the success value
     /// is discarded.
     ///
