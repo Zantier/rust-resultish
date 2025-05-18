@@ -20,6 +20,24 @@ pub enum Resultish<T, E> {
 }
 
 impl<T, E> Resultish<T, E> {
+    /// Converts from `&mut Resultish<T, E>` to `Resultish<&mut T, &mut E>`.
+    pub fn as_mut(&mut self) -> Resultish<&mut T, &mut E> {
+        match self {
+            Ok(ok) => Ok(ok),
+            Err(err) => Err(err),
+            Both(ok, err) => Both(ok, err),
+        }
+    }
+
+    /// Converts from `&Resultish<T, E>` to `Resultish<&T, &E>`.
+    pub fn as_ref(&self) -> Resultish<&T, &E> {
+        match self {
+            Ok(ok) => Ok(ok),
+            Err(err) => Err(err),
+            Both(ok, err) => Both(ok, err),
+        }
+    }
+
     /// Returns `true` if the result contains a success value.
     ///
     /// # Examples
