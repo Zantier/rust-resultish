@@ -122,7 +122,7 @@ impl<T, E> Resultish<T, E> {
     }
 
     /// Maps a `Resultish<T, E>` to `Resultish<U, E>` by applying a function to the success value,
-    /// and leaving the error value untouched
+    /// and leaving the error value untouched.
     pub fn map<U, F>(self, op: F) -> Resultish<U, E>
     where
         F: FnOnce(T) -> U,
@@ -134,8 +134,8 @@ impl<T, E> Resultish<T, E> {
         }
     }
 
-    /// Maps a `Resultish<T, E>` to `Resultish<T, F>` by applying a function to the success value,
-    /// and leaving the error value untouched
+    /// Maps a `Resultish<T, E>` to `Resultish<T, F>` by applying a function to the error value,
+    /// and leaving the success value untouched.
     pub fn map_err<F, O>(self, op: O) -> Resultish<T, F>
     where
         O: FnOnce(E) -> F,
@@ -216,7 +216,8 @@ impl<T, E> Resultish<T, E> {
 }
 
 impl<T, E> Resultish<&T, E> {
-    /// Maps a `Resultish<&T, E>` to a `Resultish<T, E>` by cloning the contents of the Ok part.
+    /// Maps a `Resultish<&T, E>` to a `Resultish<T, E>` by cloning the contents of the success
+    /// value.
     pub fn cloned(self) -> Resultish<T, E>
     where
         T: Clone,
@@ -228,7 +229,8 @@ impl<T, E> Resultish<&T, E> {
         }
     }
 
-    /// Maps a `Resultish<&T, E>` to a `Resultish<T, E>` by copying the contents of the Ok part.
+    /// Maps a `Resultish<&T, E>` to a `Resultish<T, E>` by copying the contents of the success
+    /// value.
     pub fn copied(self) -> Resultish<T, E>
     where
         T: Copy,
@@ -242,7 +244,8 @@ impl<T, E> Resultish<&T, E> {
 }
 
 impl<T, E> Resultish<&mut T, E> {
-    /// Maps a `Resultish<&mut T, E>` to a `Resultish<T, E>` by cloning the contents of the Ok part.
+    /// Maps a `Resultish<&mut T, E>` to a `Resultish<T, E>` by cloning the contents of the success
+    /// value.
     pub fn cloned(self) -> Resultish<T, E>
     where
         T: Clone,
@@ -254,7 +257,8 @@ impl<T, E> Resultish<&mut T, E> {
         }
     }
 
-    /// Maps a `Resultish<&mut T, E>` to a `Resultish<T, E>` by copying the contents of the Ok part.
+    /// Maps a `Resultish<&mut T, E>` to a `Resultish<T, E>` by copying the contents of the success
+    /// value.
     pub fn copied(self) -> Resultish<T, E>
     where
         T: Copy,
