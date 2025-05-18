@@ -213,7 +213,58 @@ impl<T, E> Resultish<T, E> {
             Both(ok, err) => (Some(ok), Some(err)),
         }
     }
+}
 
+impl<T, E> Resultish<&T, E> {
+    /// Maps a `Resultish<&T, E>` to a `Resultish<T, E>` by cloning the contents of the Ok part.
+    pub fn cloned(self) -> Resultish<T, E>
+    where
+        T: Clone,
+    {
+        match self {
+            Ok(ok) => Ok(ok.clone()),
+            Err(err) => Err(err),
+            Both(ok, err) => Both(ok.clone(), err),
+        }
+    }
+
+    /// Maps a `Resultish<&T, E>` to a `Resultish<T, E>` by copying the contents of the Ok part.
+    pub fn copied(self) -> Resultish<T, E>
+    where
+        T: Copy,
+    {
+        match self {
+            Ok(ok) => Ok(*ok),
+            Err(err) => Err(err),
+            Both(ok, err) => Both(*ok, err),
+        }
+    }
+}
+
+impl<T, E> Resultish<&mut T, E> {
+    /// Maps a `Resultish<&mut T, E>` to a `Resultish<T, E>` by cloning the contents of the Ok part.
+    pub fn cloned(self) -> Resultish<T, E>
+    where
+        T: Clone,
+    {
+        match self {
+            Ok(ok) => Ok(ok.clone()),
+            Err(err) => Err(err),
+            Both(ok, err) => Both(ok.clone(), err),
+        }
+    }
+
+    /// Maps a `Resultish<&mut T, E>` to a `Resultish<T, E>` by copying the contents of the Ok part.
+    pub fn copied(self) -> Resultish<T, E>
+    where
+        T: Copy,
+    {
+        match self {
+            Ok(ok) => Ok(*ok),
+            Err(err) => Err(err),
+            Both(ok, err) => Both(*ok, err),
+        }
+    }
 }
 
 impl<T, E> From<Result<T, E>> for Resultish<T, E> {
